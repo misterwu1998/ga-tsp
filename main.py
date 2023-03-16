@@ -1,6 +1,6 @@
 import numpy as np
 import config as conf
-from ga import Ga
+from ga import Ga, solveTSP
 import matplotlib.pyplot as plt
 
 config = conf.get_config()
@@ -19,17 +19,15 @@ def build_dist_mat(input_list):
 
 
 # 城市坐标
-city_pos_list = np.random.rand(config.city_num, config.pos_dimension)
+city_pos_list = np.random.rand(config.city_num, config.pos_dimension) # 城市个数×2
 # 城市距离矩阵
-city_dist_mat = build_dist_mat(city_pos_list)
+city_dist_mat = build_dist_mat(city_pos_list) # 二维数组[i,j]: i号到j号的距离
 
 print(city_pos_list)
 print(city_dist_mat)
 
 # 遗传算法运行
-ga = Ga(city_dist_mat)
-result_list, fitness_list = ga.train()
-result = result_list[-1]
+result,fitness_list = solveTSP(city_dist_mat, True, nIterations=400)
 result_pos_list = city_pos_list[result, :]
 
 # 绘图
@@ -37,14 +35,16 @@ result_pos_list = city_pos_list[result, :]
 plt.rcParams['font.sans-serif'] = ['KaiTi']  # 指定默认字体
 plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
 
-fig = plt.figure()
+# fig = plt.figure()
 plt.plot(result_pos_list[:, 0], result_pos_list[:, 1], 'o-r')
 plt.title(u"路线")
 plt.legend()
-fig.show()
+# fig.show()
+plt.show()
 
-fig = plt.figure()
+# fig = plt.figure()
 plt.plot(fitness_list)
 plt.title(u"适应度曲线")
 plt.legend()
-fig.show()
+# fig.show()
+plt.show()
