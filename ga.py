@@ -1,4 +1,3 @@
-import config as conf
 import random
 import numpy as np
 
@@ -136,29 +135,31 @@ class Ga:
 
 def solveTSP(
     distMat
-    , addVirtualSourcePoint=False
+    , closed=True
     , nIndividuals=50
     , nIterations=500
     , mutationProbability=0.25):
     '''
         distMat[i,j]: i号到j号的距离
         addVirtualSourcePoint: 要不要加一个虚拟源点，它到任意点的距离都是0；算法得到的路线默认是闭环的，加了这个虚拟源点就是开环的
-        return: 路径上各点序号[], 适应度曲线[]
+        return: 路径上各点序号（对于闭环的结果，终点就是起点）[], 适应度曲线[]
     '''
-    if addVirtualSourcePoint:
-        newShape = (np.array(np.shape(distMat))+1).astype('int')
-        newDistMat = np.zeros(newShape)
-        newDistMat[1:,1:] = distMat
-        distMat = newDistMat
     ga = Ga(nIndividuals,distMat,mutationProbability)
     ret = ga.train(nIterations)
-    result = list(ret[0][-1])
+    result = list(ret[0][-1]) # 终点就是起点
     fitness_list = ret[1]
-    if addVirtualSourcePoint:
-        # 抽走多出来的那个虚拟点
-        result.remove(0)
-        for i in range(len(result)):
-            result[i] -= 1
-        # 抽走最后的闭环起点
-        result.pop(-1)
+    if not closed: # 不想要闭环的路径
+        # 那就需要在闭环路径上找到最长的一个弧，从它切开
+        i = np.array(result[:-1])
+        j = np.array(result[1:])
+        stepLengths = distMat[i,j] # [x]: 闭环路径上第x位到第x+1位这段弧的长度（注意不是x号点到x+1号点）
+        ndxOfLongestStep = np.argmax(stepLengths) # 是一维数组，不需要unravel_index
+        # 从原本的第x到第x+1步这里切断
+        openedResult = []
+        for x in range(ndxOfLongestStep+1, len(result)): # 切口的右侧
+            openedResult.append(result[x])
+        for x in range(ndxOfLongestStep+1): # 切口的左侧
+            openedResult.append(result[x])
+        result = openedResult
+    # 不想要闭环的路径
     return result, fitness_list
