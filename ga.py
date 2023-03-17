@@ -119,9 +119,12 @@ class Ga:
             if individual.fitness < self.best.fitness:
                 self.best = individual
 
-    def train(self, nIterations):
+    def train(self, nIterations, initialGene=None):
+        '''
+            initialGene: 初始基因；具体到当前TSP问题，就是提供一个依次存储了各城市编号的list作为迭代起始状态
+        '''
         # 初代种群
-        self.individual_list = [Individual(self.gene_len,self.city_dist_mat) for _ in range(self.individual_num)]
+        self.individual_list = [Individual(self.gene_len,self.city_dist_mat,initialGene) for _ in range(self.individual_num)]
         self.best = self.individual_list[0]
         # 迭代
         for i in range(nIterations):
@@ -138,14 +141,16 @@ def solveTSP(
     , closed=True
     , nIndividuals=50
     , nIterations=500
-    , mutationProbability=0.25):
+    , mutationProbability=0.25
+    , initialPath = None):
     '''
         distMat[i,j]: i号到j号的距离
-        addVirtualSourcePoint: 要不要加一个虚拟源点，它到任意点的距离都是0；算法得到的路线默认是闭环的，加了这个虚拟源点就是开环的
+        closed: 要闭环的结果吗？
         return: 路径上各点序号（对于闭环的结果，终点就是起点）[], 适应度曲线[]
+        initialPath: 提供一个依次存储了各城市编号的list作为迭代起始状态
     '''
-    ga = Ga(nIndividuals,distMat,mutationProbability)
-    ret = ga.train(nIterations)
+    model = Ga(nIndividuals,distMat,mutationProbability)
+    ret = model.train(nIterations,initialPath)
     result = list(ret[0][-1]) # 终点就是起点
     fitness_list = ret[1]
     if not closed: # 不想要闭环的路径

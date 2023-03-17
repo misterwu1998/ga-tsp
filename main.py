@@ -27,7 +27,7 @@ print(city_pos_list)
 print(city_dist_mat)
 
 # 遗传算法运行
-result,fitness_list = solveTSP(city_dist_mat, False, nIterations=400)
+result,fitness_list = solveTSP(city_dist_mat, False, nIterations=400, initialPath=[i for i in range(15)])
 result_pos_list = city_pos_list[result, :]
 
 # 绘图
