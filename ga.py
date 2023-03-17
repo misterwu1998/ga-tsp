@@ -157,14 +157,19 @@ def solveTSP(
         # 那就需要在闭环路径上找到最长的一个弧，从它切开
         i = np.array(result[:-1])
         j = np.array(result[1:])
-        stepLengths = distMat[i,j] # [x]: 闭环路径上第x位到第x+1位这段弧的长度（注意不是x号点到x+1号点）
+        stepLengths = distMat[i,j] # [x]: 闭环路径上第x位到第x+1位这段弧的长度（注意不是x号点到x+1号点）；需要注意，最后一个步长就是回到起点的那一步
         ndxOfLongestStep = np.argmax(stepLengths) # 是一维数组，不需要unravel_index
+        
         # 从原本的第x到第x+1步这里切断
-        openedResult = []
-        for x in range(ndxOfLongestStep+1, len(result)): # 切口的右侧
-            openedResult.append(result[x])
-        for x in range(ndxOfLongestStep+1): # 切口的左侧
-            openedResult.append(result[x])
-        result = openedResult
+        if ndxOfLongestStep==np.size(stepLengths)-1: # 最长的就是回到起点的那一步
+            result = result[:-1] # 直接丢弃最后那个重复的起点
+        else: # 最长的不是回到起点的那一步
+            openedResult = []
+            # 如果此时丢弃原先的那个重复起点，则此后len(result)==size(steLengths)；这里不丢弃，只是无视
+            for x in range(ndxOfLongestStep+1, np.size(stepLengths)): # 断开点右边的
+                openedResult.append(result[x])
+            for x in range(0, ndxOfLongestStep+1): # 断开点左边的，包括迈出最大一步的那个点
+                openedResult.append(result[x])
+            result = openedResult
     # 不想要闭环的路径
     return result, fitness_list
